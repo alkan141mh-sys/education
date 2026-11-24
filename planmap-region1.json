@@ -1,0 +1,16 @@
+{
+ "about": "Plan-map spec for Region 1 (supply path), used by `edu_tools.py planmap`. One stop per map unit, same ids. l1/l2: the two box lines; blurb: 1-2 sentences in names he knows at that point (update a blurb when a unit introduces its names). The tool adds 'Bitti.' / 'Sıradaki durak.' by status.",
+ "chapter": 1,
+ "title": "Besleme yolunda neredeyiz",
+ "deadline": "2026-12-20",
+ "done_row": {"label": "Gerilim sinyal yolu ✓", "blurb": "Bölücü gerilimi küçültüyor, V_MID onu yukarı kaydırıyor; U3A tamponu XADC'nin akım çekmesini engelliyor, U3B ve U4A küçük gerilimleri büyütüyor."},
+ "stops": [
+  {"id": "R1.1", "l1": "AVDD", "l2": "", "blurb": "Arty'nin 3V3'ü R6 ile C2'den geçip sakinleşiyor ve AVDD oluyor; τ = 1 ms'den çok kısa kıpırtılar AVDD'ye geçemiyor."},
+  {"id": "R1.2", "l1": "neden", "l2": "referans", "blurb": "AVDD sakin ama karttan karta ve yüke göre biraz oynuyor; V_MID'i doğrudan AVDD'den bölersek o da oynar, bu yüzden AVDD'yi takip etmeyen sabit bir gerilim gerekiyor."},
+  {"id": "R1.3", "l1": "referans", "l2": "parçası", "blurb": "AVDD ne yaparsa yapsın tek bir gerilimi sabit tutan üç bacaklı bir parça. AVDD'den bir direnç üzerinden besleniyor."},
+  {"id": "R1.4", "l1": "parçanın", "l2": "akımı", "blurb": "Bu parça ancak yeterince akım gelirse çalışıyor. Dirençten geçen akımı hesaplayıp parçaya ve aşağıdaki devreye nasıl bölündüğüne bakacağız."},
+  {"id": "R1.5", "l1": "bölücü", "l2": "1.5 V", "blurb": "Sabit gerilimden 1.5 V'u bir bölücüyle alıyoruz. 1.5 V seçilmesinin sebebi, sinyallerin bunun etrafında 0–3.3 V içinde güvenle salınabilmesi."},
+  {"id": "R1.6", "l1": "tampon", "l2": "→ V_MID", "blurb": "Bölücünün çıkışı üstüne yük binince sarkar. Bir op-amp tamponu bunu önlüyor; tamponun çıkışı V_MID oluyor."}
+ ],
+ "later": "Sonra: açık uç testi · akım bloğu · Ω / diyot / C · arayüz · yerleşim"
+}

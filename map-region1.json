@@ -1,0 +1,240 @@
+{
+ "region": "R1",
+ "title": "Besleme yolu: AVDD → VREF → V_MID",
+ "source_docs": [
+  "claude/stage-1-analog-supply-reference.md",
+  "claude/stage-2a-voltage-input.md (V_MID load)"
+ ],
+ "breadcrumb_root": "Besleme yolu",
+ "why_now": "The voltage signal path is done; it rests on V_MID (zero line) and on AVDD (op-amp supply). This chapter shows where both come from. Path change: announce it with the signal-vs-supply map.",
+ "upstream": [
+  "Arty 3V3 rail (from the Arty's own regulators, fed by the 12 V adapter)"
+ ],
+ "downstream": [
+  "V_MID feeds the divider bottom and every R_g (voltage block)",
+  "AVDD feeds every op-amp and the TL431",
+  "VREF_BUF feeds the Ω block (introduced there, not here)",
+  "Q1 open-lead test nudges V_MID (own chapter)"
+ ],
+ "review": "novice-reader pass 24 Nov 01:15: fixes applied (R1.3 split, every bare number given a source, C1 cut, mid node vs V_MID made explicit, cutoff idea pictured before any 159 Hz)",
+ "units": [
+  {
+   "id": "R1.1",
+   "title": "AVDD: sakin besleme",
+   "status": "explained 23 Nov, not checked; re-run briefly from the drawing",
+   "need": "The op-amps and the reference need a quiet supply. The Arty's 3V3 carries fast up-and-down wiggles (ripple from its regulator, short spikes when the FPGA switches).",
+   "depends_on": ["opamp-rules"],
+   "introduces": {
+    "concepts": ["rc-filter"],
+    "names": {
+     "AVDD": "filtered 3.3 V for the analog chips",
+     "R6": "10 Ω",
+     "C2": "100 µF (C3 100 nF beside it)"
+    }
+   },
+   "uses_names": ["V_MID"],
+   "bridge": "map-signal-vs-supply: the supply-path row, box 'AVDD filter'",
+   "drawing": "3V3 (noisy line) → R6 10 Ω → AVDD node (calm line), C2 100 µF to GND. Second panel: a short spike barely moves AVDD (charge limited by R6), a slow 2 ms step passes. AVDD ≈ 3.23 V because the analog chips draw about 3.7 mA through R6: 3.7 mA × 10 Ω ≈ 37 mV.",
+   "key_question": null,
+   "check": {
+    "q": "Two changes on 3V3: a 0.03 µs spike and a 5 ms dip. Which one reaches AVDD, and why?",
+    "a": "the 5 ms dip: it lasts long enough for charge to flow through R6 into C2; the spike is over before C2 can change"
+   },
+   "values": {
+    "teaching": "AVDD ≈ 3.23 V; '159 Hz' only shown as the dividing line, not asked",
+    "real": "3.09–3.36 V over all boards and loads (revealed in R1.2)"
+   },
+   "traps": [
+    "It filters the supply, not the measured signal (23 Nov confusion)",
+    "R alone doesn't filter; R and C together"
+   ],
+   "claim": "A resistor in series with a capacitor to ground smooths the supply: fast changes can't move enough charge through R into C, slow ones can.",
+   "rubric": [
+    "names the slow change (5 ms) as the one that passes",
+    "reason mentions charge/current limited by R6 or time for C to fill",
+    "does not claim R alone filters"
+   ]
+  },
+  {
+   "id": "R1.2",
+   "title": "Neden bir referans gerekiyor?",
+   "need": "V_MID must sit at one known voltage. AVDD itself differs from board to board and with load: 3.09–3.36 V.",
+   "depends_on": ["R1.1", "voltage-divider"],
+   "introduces": {
+    "concepts": ["voltage-reference"],
+    "names": {
+     "VREF": "a fixed voltage that doesn't follow AVDD"
+    }
+   },
+   "uses_names": ["AVDD", "V_MID"],
+   "bridge": "R1.1 drawing; add a divider from AVDD that would give 1.5 V",
+   "drawing": "AVDD → divider with ratio 0.464 (= 1.5 / 3.23, chosen to give 1.5 V from a typical AVDD) → 'V_MID?'. Two boards side by side: AVDD 3.09 V → 1.43 V, AVDD 3.36 V → 1.56 V. Last panel: the same divider fed from a fixed 'VREF' box gives the same V_MID on both boards.",
+   "key_question": {
+    "q": "If we made V_MID by dividing AVDD directly (×0.464), what is V_MID on a board with AVDD 3.09 V and on one with 3.36 V?",
+    "a": "1.43 V vs 1.56 V: the zero line differs by 130 mV between boards, and drifts with load",
+    "key": true
+   },
+   "check": null,
+   "values": {
+    "teaching": "×0.464 only illustrates",
+    "real": "the real design divides VREF by 0.6 (R1.5)"
+   },
+   "traps": [
+    "Don't name TL431 yet; this unit only creates the need"
+   ],
+   "claim": "Dividing AVDD directly makes V_MID move with AVDD; a fixed reference is needed.",
+   "rubric": [
+    "computes both values (≈1.43 V and ≈1.56 V) or the ≈130 mV difference",
+    "concludes that the zero line would differ between boards / drift"
+   ]
+  },
+  {
+   "id": "R1.3",
+   "title": "TL431: 2.495 V'u tutan parça",
+   "need": "A part that keeps one voltage, 2.495 V, whatever AVDD does.",
+   "depends_on": ["R1.2"],
+   "introduces": {
+    "concepts": [],
+    "names": {
+     "TL431": "a 3-leg part: cathode (top) and REF both on VREF, anode on GND; it holds VREF at 2.495 V",
+     "R1@supply": "the resistor from AVDD to VREF"
+    }
+   },
+   "uses_names": ["AVDD", "VREF"],
+   "bridge": "R1.2 last panel: open the 'VREF' box",
+   "drawing": "Black box first: AVDD → R1 220 Ω → VREF node → TL431 → GND, symbol drawn with its three legs labelled; on the drawing itself: 'R1 here = 220 Ω (not the R1 of our divider lessons)'. Three AVDD values (3.09 / 3.23 / 3.36 V) all give VREF = 2.495 V; only R1's voltage changes.",
+   "key_question": null,
+   "check": {
+    "q": "AVDD rises from 3.09 V to 3.36 V. Which voltage changes: VREF or the one across R1? By how much?",
+    "a": "across R1: from 0.595 V to 0.865 V (+0.27 V); VREF stays 2.495 V"
+   },
+   "values": {
+    "teaching": "VREF 2.495 V",
+    "real": "VREF 2.467–2.520 V between parts; AVDD moving 270 mV moves VREF < 1 mV"
+   },
+   "traps": [
+    "Name clash R1: on the drawing, not only in words",
+    "No 'zener' unless defined",
+    "Behaviour only (black box); currents come in R1.4"
+   ],
+   "claim": "The TL431 holds VREF at 2.495 V; when AVDD changes, only the voltage across R1 changes.",
+   "rubric": [
+    "says VREF stays 2.495 V",
+    "says the R1 voltage changes, ≈0.595 → 0.865 V (+0.27 V)"
+   ]
+  },
+  {
+   "id": "R1.4",
+   "title": "TL431'in akımı",
+   "need": "The TL431 works only if enough current reaches it: its datasheet asks for at least 1 mA. R1 must supply that, plus whatever the circuit draws from VREF.",
+   "depends_on": ["R1.3", "series-current-same"],
+   "introduces": {
+    "concepts": ["current-split-at-node"],
+    "names": {}
+   },
+   "uses_names": ["AVDD", "VREF", "TL431"],
+   "bridge": "R1.3 drawing; add current arrows",
+   "drawing": "Step 1: current through R1 = (AVDD − VREF) / 220 Ω, computed on the drawing. Step 2: at the VREF node that current splits: part to the ×0.6 divider (0.1 mA), the rest into the TL431. Step 3: the TL431 takes whatever is left, as long as ≥ 1 mA.",
+   "key_question": null,
+   "check": {
+    "q": "AVDD = 3.227 V, VREF = 2.495 V, R1 = 220 Ω: current through R1? If the divider below takes 0.1 mA, how much is left for the TL431, and is it ≥ 1 mA?",
+    "a": "(3.227 − 2.495)/220 ≈ 3.33 mA; ≈ 3.23 mA to the TL431; yes"
+   },
+   "values": {
+    "teaching": "3.33 mA, 0.1 mA, 3.23 mA",
+    "real": "TL431 current 2.46–3.98 mA over all tolerances"
+   },
+   "traps": [
+    "series-current-same is only level 1: practise the split with the arrows before the check"
+   ],
+   "claim": "R1's current is (AVDD − VREF)/R1; at the VREF node it splits between the load and the TL431, which needs at least 1 mA.",
+   "rubric": [
+    "≈3.33 mA through R1",
+    "≈3.23 mA left for the TL431 after 0.1 mA",
+    "judges it ≥ 1 mA"
+   ]
+  },
+  {
+   "id": "R1.5",
+   "title": "×0.6 bölücü: 1.497 V",
+   "need": "1.5 V from 2.495 V. Why 1.5: every signal swings ±1.35 V around V_MID (the window agreed in the design: it keeps op-amp outputs away from their limits near 0 V and 3.3 V), so V_MID ≈ 1.5 V puts 0.15–2.85 V safely inside 0–3.3 V.",
+   "depends_on": ["R1.4", "voltage-divider", "parallel-resistors"],
+   "introduces": {
+    "concepts": [],
+    "names": {
+     "R2..R5@supply": "the four 10 kΩ of the ×0.6 divider (R4 ∥ R5 = 5 kΩ)",
+     "mid-node": "the divider's middle point, NOT yet V_MID (V_MID is made from it in R1.6)"
+    }
+   },
+   "uses_names": ["VREF", "V_MID"],
+   "bridge": "R1.4 drawing; the 0.1 mA branch becomes the divider",
+   "drawing": "Window bar first: 0–3.3 V with 1.5 ± 1.35 V marked (0.15 and 2.85 V). Then VREF → R2 10 kΩ → mid node 1.497 V → R3 10 kΩ → R4∥R5 5 kΩ → GND. Note on the drawing: 'R2 here ≠ R2 of our lessons'.",
+   "key_question": null,
+   "check": {
+    "q": "Warm-up: 10 kΩ ∥ 10 kΩ = ? Then: why is the ratio exactly 0.6?",
+    "a": "5 kΩ; bottom 10k + 5k = 15 kΩ, total 25 kΩ, 15/25 = 0.6 → 2.495 × 0.6 = 1.497 V"
+   },
+   "values": {
+    "teaching": "1.497 V",
+    "real": "1.466–1.529 V; 15 kΩ isn't sold, hence 10k + two 10k in parallel"
+   },
+   "traps": [
+    "parallel-resistors is fragile: warm-up first",
+    "Name clash R2"
+   ],
+   "claim": "VREF × 15/25 = 0.6 × 2.495 ≈ 1.497 V, centred so ±1.35 V fits inside 0–3.3 V.",
+   "rubric": [
+    "10 kΩ ∥ 10 kΩ = 5 kΩ",
+    "bottom 15 kΩ over total 25 kΩ = 0.6",
+    "≈1.497 V"
+   ]
+  },
+  {
+   "id": "R1.6",
+   "title": "U1A tamponu: V_MID",
+   "need": "Many places hang on V_MID (the voltage divider's bottom and every R_g); together they can pull up to about 63 µA (the design's worst-case sum, mostly the R_g's when a gain stage is overloaded). The mid node sits behind about 6 kΩ (R2 ∥ 15 kΩ), so it would sag.",
+   "depends_on": ["R1.5", "buffer", "loading", "thevenin"],
+   "introduces": {
+    "concepts": [],
+    "names": {
+     "U1": "the third MCP6002 (spelled U1 / U1A); U1A turns the mid node into V_MID (U1B: used later, in the Ω block)"
+    }
+   },
+   "uses_names": ["V_MID", "MCP6002", "R_g", "TAP", "mid-node"],
+   "bridge": "R1.5 drawing; hang the V_MID loads directly on the mid node first",
+   "drawing": "Panel 1 (no buffer): mid node seen as 1.497 V behind 6 kΩ (Thevenin, as in his own derivation); 63 µA × 6 kΩ ≈ 0.38 V sag. Panel 2: mid node → U1A (+), output wired to − → this output is V_MID, 1.497 V under any load. Label: 'mid node ≠ V_MID; V_MID = U1A output'.",
+   "key_question": null,
+   "check": {
+    "q": "Without U1A, 63 µA flows out of the mid node (≈ 6 kΩ behind it). How far does it move?",
+    "a": "63 µA × 6 kΩ ≈ 0.38 V"
+   },
+   "values": {
+    "teaching": "63 µA worst case; 6 kΩ",
+    "real": "stage 2a: at most 63 µA on V_MID; tap impedance 6.0 kΩ. C1 100 nF on the mid node exists (noise filter) but is not taught here"
+   },
+   "traps": [
+    "TAP vs V_MID confusion (fragile): keep 'mid node', 'V_MID' and 'TAP' visually distinct",
+    "U1B: one line only"
+   ],
+   "claim": "A loaded 6 kΩ node sags by I × 6 kΩ; the U1A buffer's output, not the mid node, is V_MID.",
+   "rubric": [
+    "63 µA × 6 kΩ ≈ 0.38 V",
+    "says the buffer output is V_MID / mid node ≠ V_MID"
+   ]
+  }
+ ],
+ "chapter_close": {
+  "achieved": "AVDD filter, why a reference, TL431 + R1, its current, ×0.6 divider, U1A buffer → V_MID",
+  "deferred": [
+   "VREF_BUF (U1B) → Ω block",
+   "C1 noise filter on the mid node",
+   "Q1 open-lead test (own chapter)",
+   "V_P/V_N live V_MID measurement (FPGA side)"
+  ],
+  "next_options": [
+   "Q1 open-lead test (short)",
+   "Current block"
+  ]
+ },
+ "names_note": "introduces.names and uses_names hold registry ids (claude/educator-tools/names.json); decision 11"
+}

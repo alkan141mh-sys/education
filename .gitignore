@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Tool outputs (planmap, drafts)
+pm.html
+pm.svg
+planmap.html
+planmap.svg
+draft*.md
+d.svg
+
+# Real learner data: kept out until the privacy decision
+learner-model*.json
+learner/
+logs/
+log*.json
+misunderstandings*.md
+
+# Office lock files
+~$*
+
+# Personal Claude Code settings
+.claude/settings.local.json

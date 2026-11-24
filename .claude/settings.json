@@ -1,0 +1,12 @@
+{
+  "env": { "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8" },
+  "permissions": {
+    "allow": [
+      "Bash(python edu_tools.py:*)",
+      "Bash(py edu_tools.py:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  }
+}
