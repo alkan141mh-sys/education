@@ -537,7 +537,7 @@ def planmap(spec, done, here, num, today, here_label="▲ sıradaki"):
     svg_open = '<svg width="100%" viewBox="0 0 510 190" xmlns="http://www.w3.org/2000/svg" role="img">'
     title = f"<title>Görsel {num}</title><desc>{_esc(spec['title'])}; kutulara tıklanır</desc>"
     html = (BOARD_STYLE + f'<h2 class="sr-only">Görsel {num}: {_esc(spec["title"])}</h2>' + svg_open + title + body + "</svg>"
-            + '<div id="d">Bir kutuya tıkla, o durağın kısa açıklaması burada çıksın.</div>'
+            + '<div id="d">Bir kutuya tıkla, o durağın açıklaması burada çıksın.</div>'
             + "<script>const T=" + json.dumps(blurbs, ensure_ascii=False)
             + ";function show(i,el){document.querySelectorAll('.k').forEach(g=>g.classList.remove('sel'));"
               "el.classList.add('sel');document.getElementById('d').textContent=T[i];}</script>")
