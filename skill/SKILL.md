@@ -49,7 +49,7 @@ Each turn use only: this chapter's concepts, the current unit's dependencies, fr
 For every guess or check question:
 1. **Confidence before the verdict.** After he answers and before you say right or wrong, ask with `AskUserQuestion` (one tap, never a typed number): question "Cevabından ne kadar emindin?", options "Emindim", "Büyük ihtimalle", "Tahmin ettim", "Hiç fikrim yoktu". Skip it only if he already said how sure he was.
 2. **"Nasıl buldun?" on right answers** when the answer came without its reasoning, when he picked "Tahmin ettim" or "Hiç fikrim yoktu", or when a pattern-match could give the same result. A right answer with wrong reasoning counts as a misconception, never as known.
-3. **Stash it** (in the same db_write as any board/state change): append to `learner/model.stash` an entry `{unit, question, his answer verbatim, his reasoning if given, confidence, claim, rubric, date}`. Don't grade it into the model yourself.
+3. **Stash it** (in the same db_write as any board/state change): append to `learner/model.stash` an entry `{unit, question, his answer verbatim, his reasoning if given, confidence, assistance (unassisted / scaffolded), claim, rubric, date}`. Don't grade it into the model yourself.
 4. Then the verdict, part by part.
 A confident wrong answer ("Emindim") signals a belief, not a gap: use the misconception procedure.
 
@@ -79,7 +79,7 @@ Run at the end of every unit and as soon as a misunderstanding signal appears. A
 
 ## Misconceptions: counterexample first
 Kinds: `learner_belief` (a wrong model he holds), `learner_slip` (arithmetic or reading slip), `tutor_error` (your mistake; closed once fixed).
-For a `learner_belief`: don't announce "that's wrong". Build a case, with its drawing, where his model predicts something visibly impossible, and ask him to predict it. Let him find the contradiction; then state the correct model briefly. It is **resolved** only when both hold: (1) he says in his words why the old idea was wrong, and (2) he gets a new case right that would have triggered the old idea. Until then status `active`, concept fragile. If it comes back later, reopen it with the earlier date.
+For a `learner_belief`: don't announce "that's wrong". Build a case, with its drawing, where his model predicts something visibly impossible, and ask him to predict it. Let him find the contradiction; then state the correct model briefly. It is **resolved** only when both hold: (1) he says in his words why the old idea was wrong, and (2) he gets a new case right that would have triggered the old idea, asked without any hint and with a different surface from the cases used while untangling it; stash it with `assistance: unassisted` (a hint or worked step before his answer makes it `scaffolded`, and it doesn't count) (27 Nov: from the plugin scan, his decision; no session evidence yet). Until then status `active`, concept fragile. If it comes back later, reopen it with the earlier date.
 For a slip: one short self-check ("which step gives that?") is enough.
 
 ## Hint ladder (when he is stuck on a guess or check question)
@@ -187,6 +187,14 @@ Short messages, one unit each. Don't repeat an open question he has seen. When a
 
 ## Teacher's commentary (occasional)
 At the end of a unit or chapter, after a misunderstanding, or when you notice a pattern: a short, clearly labelled note ("Öğretmen notu") with honest, specific reflection and suggestions (material, order, pace, this script). Suggestions only; he decides; script changes go through the skill review card. Include honest disagreement once, with reasons, then follow his decision.
+
+**Noted candidates (27 Nov, not rules):** methods from the plugin scan (repo `docs/eklenti-taramasi.md`) that he chose to note rather than adopt. When one's trigger shows up, add one line to the Öğretmen notu naming the candidate and what triggered it; never apply it without his decision.
+- Teach-back (he explains to someone who knows only the earlier units): at a chapter close, or when a concept should reach level 4 and nothing unprompted shows it.
+- Confidence again after the answer: when his confidence picks and results disagree often (e.g. two "Emindim" on wrong answers in a unit).
+- "What did you try?" before a hint: when he asks "ipucu" with no attempt, or a rung misses because you didn't know where he was stuck.
+- Fading support: when a level-3 concept still gets the full drawing or skeleton, or he says "hızlanalım" / "bu kolay" on scaffolded steps.
+- Erroneous example (a wrong worked solution for him to fix): when a `learner_belief` survives the counterexample or reopens.
+- Rhythm (mixing explanation, guess, practice, teach-back): when he signals fatigue or monotony, or several units in a row ran the same pattern.
 
 ## End of a session
 Summarise what was understood, what is open, where to pick up. If the stash is not empty, run the blind tracker. Update the project files: progress `claude/learning-progress.md`, glossary `claude/learning-glossary.md` (TR/EN), exercises `claude/learning-exercises.md` (answers in a separate section), misunderstanding log `claude/learning-misunderstandings.md`, the region map, and the design doc when the method changes.

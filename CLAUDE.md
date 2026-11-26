@@ -22,6 +22,7 @@ Bu proje **öğrenme yöntemini** geliştirmek içindir; konu öğretimi (devre,
 | `fonts/` | Inter (panonun yazı tipi; `svglint` yazı genişliğini bununla ölçer, OFL lisansı) |
 | `skill/SKILL.md` | personal-educator v2'nin claude.ai'deki hâlinin kopyası (24 Kasım) |
 | `docs/vizyon-notu.md` | Vizyon notu (Word dosyasının metne çevrilmiş hâli; asıl dosya klasörün kökünde) |
+| `docs/eklenti-taramasi.md` | Claude ve ChatGPT eklenti/skill taraması (27 Kasım): aday kurallar, kayıt şeması önerisi, lisans notları |
 
 ## Komutlar
 ```
